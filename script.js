@@ -7,6 +7,7 @@ const mealList = document.getElementById('mealList');
 const dailyTotal = document.getElementById('dailyTotal');
 const exportTXT = document.getElementById('exportTXT');
 const exportCSV = document.getElementById('exportCSV');
+const exportPDF = document.getElementById('exportPDF');
 
 let mealsData = JSON.parse(localStorage.getItem('mealsData')) || {};
 
@@ -83,3 +84,27 @@ function downloadFile(filename, content) {
     element.click();
     document.body.removeChild(element);
 }
+
+exportPDF.addEventListener('click', () => {
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF();
+    let y = 10;
+    doc.setFontSize(12);
+    doc.text("My Daily Meals Tracker", 10, y);
+    y += 10;
+
+    for (let date in mealsData) {
+        doc.text(`Date: ${date}`, 10, y);
+        y += 7;
+        let total = 0;
+        mealsData[date].forEach(meal => {
+            doc.text(`${meal.type}: ${meal.name} - $${meal.cost.toFixed(2)}`, 15, y);
+            y += 7;
+            total += meal.cost;
+        });
+        doc.text(`Total Cost: $${total.toFixed(2)}`, 15, y);
+        y += 10;
+    }
+
+    doc.save('meals.pdf');
+});
